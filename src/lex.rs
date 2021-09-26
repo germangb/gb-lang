@@ -17,6 +17,62 @@ pub struct Tokenizer<'input> {
     fi: [usize; 2],
 }
 
+macro_rules! handle_non_alphanum {
+    ($s:ident ,) => { return None; };
+    ($s:ident , $c0:expr => { $t0:ident }, $($tt:tt)*) => {
+        if $s.chars.peek() == Some(&$c0) {
+            $s.chars.next().unwrap();
+            return Some(Ok(token::Token::$t0($crate::lex::token::$t0 {
+                inner: std::borrow::Cow::Borrowed($s.input),
+                span: $crate::Span::default(),
+            })));
+        }
+        handle_non_alphanum! { $s , $($tt)* }
+    };
+    ($s:ident , $c0:expr => { $t0:ident, $c1:expr => $t1:ident }, $($tt:tt)*) => {
+        if $s.chars.peek() == Some(&$c0) {
+            $s.chars.next().unwrap();
+            return if $s.chars.peek() == Some(&$c1) {
+                $s.chars.next().unwrap();
+                Some(Ok(token::Token::$t1($crate::lex::token::$t1 {
+                    inner: std::borrow::Cow::Borrowed($s.input),
+                    span: Default::default(),
+                })))
+            } else {
+                Some(Ok(token::Token::$t0($crate::lex::token::$t0 {
+                    inner: std::borrow::Cow::Borrowed($s.input),
+                    span: $crate::Span::default(),
+                })))
+            };
+        }
+        handle_non_alphanum! { $s , $($tt)* }
+    };
+}
+
+macro_rules! handle_alpha {
+    ($s:ident , $($e:expr => { $t0:ident } ,)*) => {
+        // TODO(german): remove alloc
+        let mut aux = String::new();
+        loop {
+            match $s.chars.peek().copied() {
+                None => break,
+                Some(c) if c.is_alphanumeric() || c == '_' => {
+                    $s.chars.next().unwrap();
+                    aux.push(c)
+                },
+                _ => break,
+            }
+        }
+        match aux.as_str() {
+            $($e => Ok(Token::$t0($t0 {
+                inner: Cow::Borrowed($s.input),
+                span: Span::default(),
+            })),)*
+            _ => todo!(),
+        }
+    };
+}
+
 impl<'input> Tokenizer<'input> {
     fn skip_whitespace(&mut self) -> Result<(), Error> {
         loop {
@@ -67,33 +123,23 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
-    // TODO(german): remove alloc
-    #[rustfmt::skip]
     fn next_token_alpha(&mut self) -> Result<Token<'input>, Error> {
-        let mut aux = String::new();
-        loop {
-            match self.chars.peek().copied() {
-                None => break,
-                Some(c) if c.is_alphanumeric() || c == '_' => aux.push(self.chars.next().unwrap()),
-                _ => break,
-            }
-        }
-        match aux.as_str() {
-            "addr" => Ok(Token::Addr(Addr { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "break" => Ok(Token::Break(Break { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "const" => Ok(Token::Const(Const { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "continue" => Ok(Token::Continue(Continue { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "deref" => Ok(Token::Deref(Deref { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "else" => Ok(Token::Else(Else { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "if" => Ok(Token::If(If { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "let" => Ok(Token::Let(Let { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "loop" => Ok(Token::Loop(Loop { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "ptr" => Ok(Token::Ptr(Ptr { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "static" => Ok(Token::Static(Static { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "struct" => Ok(Token::Struct(Struct { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "union" => Ok(Token::Union(Union { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            "while" => Ok(Token::While(While { inner: Cow::Borrowed(self.input), span: Span::default()})),
-            _ => todo!(),
+        handle_alpha! {
+            self,
+            "addr" => { Addr },
+            "break" => { Break },
+            "const" => { Const },
+            "continue" => { Continue },
+            "deref" => { Deref },
+            "else" => { Else },
+            "if" => { If },
+            "let" => { Let },
+            "loop" => { Loop },
+            "ptr" => { Ptr },
+            "static" => { Static },
+            "struct" => { Struct },
+            "union" => { Union },
+            "while" => { While },
         }
     }
 
