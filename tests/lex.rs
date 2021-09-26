@@ -10,6 +10,15 @@ fn tokenize_empty() {
 }
 
 #[test]
+fn return_none_after_eof() {
+    let mut tokens = gb_lang::lex::tokenize("");
+    assert!(matches!(
+        [tokens.next(), tokens.next()],
+        [Some(Ok(Token::EOF(_))), None]
+    ));
+}
+
+#[test]
 fn tokenize_two_chars() {
     assert_token_matches!(
         "&=::==/=>=<=-=~=|=+=*=^=",
