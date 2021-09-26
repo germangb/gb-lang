@@ -1,0 +1,42 @@
+// ROM memory reservation and along with typing
+// The actual data to be injected in a post-processing step
+const SPRITES::[u8 256];        // Compiler will decide where to put this chunk of memory
+                                // but we can expect it to at least be linear, otherwise
+                                // a compilation error will be generated.
+const@0xffff FONT::[u8 256];    // Optionally hardcode the memory location
+
+// experiment: LISP-ish syntax
+(const        SPRITES [u8 256])
+(const@0xffff FONT    [u8 256])
+
+// The static keyword works in a similar way, but for computing memory.
+// This example defines the memory layout of the gameboy VRAM.
+static VRAM@0x8000::struct {
+    tile_data::union {
+        table0::struct {             data::[u8 0x1000] },
+        table1::struct { [u8 0x800], data::[u8 0x1000] }, // non-named fields act as padding
+    },
+    tile_maps::struct { map0::[u8 0x400],
+                        map1::[u8 0x400] },
+};
+
+// IF/IF-ELSE statement
+if 1 + 2 {
+    loop { break; }
+    if 1 {}
+} else {}
+
+// loops
+loop { break; }
+while foo {
+    if foo { break; }
+    foo -= 1;
+}
+
+// variables
+let foo::u8 = 26;
+let bar::[u8 5] = [1, VRAM::tile_data::table1::data[2], 3, foo + 4, 5];
+let baz::ptr(u8) = addr(bar[3]);
+
+// pointer operations
+deref(baz) = 2;
