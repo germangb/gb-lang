@@ -152,11 +152,33 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
+    fn next_token_string(&mut self) -> Option<Result<Token<'input>, Error>> {
+        match self.chars.peek() {
+            Some('"') => {
+                self.chars.next().unwrap();
+                loop {
+                    match self.chars.next() {
+                        Some('"') => {
+                            return Some(Ok(Token::Str(token::Str {
+                                inner: Cow::Borrowed(self.input),
+                                span: Span::default(),
+                            })))
+                        }
+                        Some(_) => {}
+                        None => return Some(Err(Error::OpenEndedStringToken)),
+                    }
+                }
+            }
+            _ => return None,
+        }
+    }
+
     fn next_token(&mut self) -> Result<Token<'input>, Error> {
         assert!(!self.ended);
         self.skip_whitespace()?;
         self.next_token_eof()
             .or_else(|| self.next_token_non_alphanum())
+            .or_else(|| self.next_token_string())
             .unwrap_or_else(|| self.next_token_alphanum())
     }
 }
@@ -168,7 +190,13 @@ impl<'input> Iterator for Tokenizer<'input> {
         if self.ended {
             None
         } else {
-            Some(self.next_token())
+            let next = self.next_token();
+            // we cannot do `self.ended = next.is_err()` because next might be the EOF
+            // token, which internally sets `ended = true`.
+            if next.is_err() {
+                self.ended = true;
+            }
+            Some(next)
         }
     }
 }

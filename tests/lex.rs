@@ -1,4 +1,7 @@
-use gb_lang::{assert_token_matches, lex::Token};
+use gb_lang::{
+    assert_token_matches,
+    lex::{Error, Token},
+};
 
 #[test]
 fn tokenize_empty() {
@@ -95,9 +98,17 @@ fn tokenize_keywords() {
 }
 
 #[test]
-#[ignore]
-fn tokenize_str() {
-    todo!();
+fn tokenize_string() {
+    assert_token_matches!("\"Hello, world\"", [Token::Str(_)]);
+}
+
+#[test]
+fn tokenize_string_error() {
+    let mut tokens = gb_lang::lex::tokenize("\"hello");
+    assert!(matches!(
+        tokens.next(),
+        Some(Err(Error::OpenEndedStringToken))
+    ));
 }
 
 #[test]

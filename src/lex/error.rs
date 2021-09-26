@@ -8,6 +8,9 @@ use std::{
 pub enum Error {
     /// Error variant for internal-use only.
     Internal,
+
+    /// Triggered when the input source ends with an open-ended string token.
+    OpenEndedStringToken,
 }
 
 impl Display for Error {
