@@ -1,3 +1,4 @@
+//#[cfg(test)]
 #[macro_export]
 macro_rules! assert_token_matches {
     (

@@ -1,7 +1,9 @@
+pub use ast::parse;
+pub use lex::tokenize;
+
 pub mod ast;
 pub mod lex;
 
-/// Represents a location within an input string.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Span {
     /// Location of upper-left-most char `[line, column]`.
@@ -20,5 +22,4 @@ impl Default for Span {
     }
 }
 
-/// Utility trait to return span information
 pub trait Spanned {}

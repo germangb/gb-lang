@@ -4,17 +4,44 @@ macro_rules! tokens {
     ) => {
         // token structs
         $(
-        #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-        $(#[$($docs_meta)+])*
-        pub struct $token_name<'a> {
-            pub(super) inner: std::borrow::Cow<'a, str>,
-            pub(super) span: crate::Span,
-        })*
+            #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+            $(#[$($docs_meta)+])*
+            pub struct $token_name<'input> {
+                pub(super) inner: std::borrow::Cow<'input, str>,
+                pub(super) span: crate::Span,
+            }
 
-        /// Language tokens.
+            impl<'input> crate::ast::Grammar<'input> for $token_name<'input> {
+                fn parse(
+                    tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
+                    _: &mut crate::ast::Context,
+                ) -> Result<Self, crate::ast::Error> {
+                    match tokens.next() {
+                        Some(Err(e)) => Err(e)?,
+                        Some(Ok(Token::$token_name(t))) => Ok(t),
+                        Some(Ok(_)) => Err(crate::ast::Error::UnexpectedToken),
+                        None => Err(crate::ast::Error::TokenizerEmpty),
+                    }
+                }
+            }
+
+            impl<'input> crate::ast::Grammar<'input> for Option<$token_name<'input>> {
+                fn parse(
+                    tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
+                    _: &mut crate::ast::Context,
+                ) -> Result<Self, crate::ast::Error> {
+                    match tokens.next() {
+                        Some(Ok(Token::$token_name(t))) => Ok(Some(t)),
+                        // TODO(german): consider if returning buffered Err from tokenizer makes sense.
+                        _ => Ok(None),
+                    }
+                }
+            }
+        )*
+
         #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-        pub enum Token<'a> {
-            $($(#[$($docs_meta)+])* $token_name ($token_name<'a>),)*
+        pub enum Token<'input> {
+            $($(#[$($docs_meta)+])* $token_name ($token_name<'input>),)*
         }
 
         // span trait
@@ -61,6 +88,8 @@ tokens! {
     pub struct Struct;
     /// `union`
     pub struct Union;
+    /// 'u8'
+    pub struct U8;
     /// `while`
     pub struct While;
 

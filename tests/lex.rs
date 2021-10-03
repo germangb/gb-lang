@@ -1,6 +1,6 @@
 use gb_lang::{
     assert_token_matches,
-    lex::{Error, Token},
+    lex::{tokens::Token, Error},
 };
 
 #[test]
@@ -14,7 +14,7 @@ fn tokenize_empty() {
 
 #[test]
 fn return_none_after_eof() {
-    let mut tokens = gb_lang::lex::tokenize("");
+    let mut tokens = gb_lang::tokenize("");
     assert!(matches!(
         [tokens.next(), tokens.next()],
         [Some(Ok(Token::EOF(_))), None]
@@ -76,7 +76,7 @@ fn tokenize_one_char() {
 #[test]
 fn tokenize_keywords() {
     assert_token_matches!(
-        "addr break const continue deref else if let loop ptr static struct union while",
+        "addr break const continue deref else if let loop ptr static struct union u8 while",
         [
             Token::Addr(_),
             Token::Break(_),
@@ -91,6 +91,7 @@ fn tokenize_keywords() {
             Token::Static(_),
             Token::Struct(_),
             Token::Union(_),
+            Token::U8(_),
             Token::While(_),
             Token::EOF(_),
         ],

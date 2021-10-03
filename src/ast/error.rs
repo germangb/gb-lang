@@ -5,11 +5,14 @@ use std::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Triggered when the input source ends with an open-ended string token.
-    OpenEndedStringToken,
+    /// Tokenization error.
+    Lex(#[from] crate::lex::Error),
 
-    /// Invalid number format.
-    InvalidNumberToken,
+    /// Unexpected token error.
+    UnexpectedToken,
+
+    /// Tokenizer ran out of tokens.
+    TokenizerEmpty,
 }
 
 impl Display for Error {

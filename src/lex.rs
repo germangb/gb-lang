@@ -1,11 +1,22 @@
-use crate::Span;
+use crate::{lex::tokens::Token, Span};
 pub use error::Error;
 use std::{borrow::Cow, iter::Peekable, str::Chars};
-pub use token::*;
 
 mod error;
-mod token;
+pub mod tokens;
 mod utils;
+
+pub fn tokenize(input: &str) -> Tokenizer<'_> {
+    Tokenizer {
+        // an EOF token is always returned at the very end, so even if the input string is empty,
+        // the iterator hasn't ended yet.
+        ended: false,
+        input,
+        chars: input.chars().peekable(),
+        begin: [0; 2],
+        fi: [0; 2],
+    }
+}
 
 #[derive(Debug)]
 pub struct Tokenizer<'input> {
@@ -21,7 +32,7 @@ macro_rules! handle_non_alphanum {
     ($s:ident , $c0:expr => { $t0:ident }, $($tt:tt)*) => {
         if $s.chars.peek() == Some(&$c0) {
             $s.chars.next().unwrap();
-            return Some(Ok(token::Token::$t0($crate::lex::token::$t0 {
+            return Some(Ok(tokens::Token::$t0($crate::lex::tokens::$t0 {
                 inner: std::borrow::Cow::Borrowed($s.input),
                 span: $crate::Span::default(),
             })));
@@ -33,12 +44,12 @@ macro_rules! handle_non_alphanum {
             $s.chars.next().unwrap();
             return if $s.chars.peek() == Some(&$c1) {
                 $s.chars.next().unwrap();
-                Some(Ok(token::Token::$t1($crate::lex::token::$t1 {
+                Some(Ok(tokens::Token::$t1($crate::lex::tokens::$t1 {
                     inner: std::borrow::Cow::Borrowed($s.input),
                     span: Default::default(),
                 })))
             } else {
-                Some(Ok(token::Token::$t0($crate::lex::token::$t0 {
+                Some(Ok(tokens::Token::$t0($crate::lex::tokens::$t0 {
                     inner: std::borrow::Cow::Borrowed($s.input),
                     span: $crate::Span::default(),
                 })))
@@ -63,11 +74,11 @@ macro_rules! handle_alpha {
             }
         }
         match aux.as_str() {
-            $($e => Ok(Token::$t0($t0 {
+            $($e => Ok(Token::$t0(tokens::$t0 {
                 inner: Cow::Borrowed($s.input),
                 span: Span::default(),
             })),)*
-            _ => Ok(Token::Identifier(Identifier {
+            _ => Ok(Token::Identifier(tokens::Identifier {
                 inner: Cow::Borrowed($s.input),
                 span: Span::default(),
             })),
@@ -90,7 +101,7 @@ impl<'input> Tokenizer<'input> {
     fn next_token_eof(&mut self) -> Option<Result<Token<'input>, Error>> {
         if self.chars.peek().is_none() {
             self.ended = true;
-            Some(Ok(Token::EOF(EOF {
+            Some(Ok(Token::EOF(tokens::EOF {
                 inner: Cow::Borrowed(self.input),
                 span: Default::default(),
             })))
@@ -141,6 +152,7 @@ impl<'input> Tokenizer<'input> {
             "static" => { Static },
             "struct" => { Struct },
             "union" => { Union },
+            "u8" => { U8 },
             "while" => { While },
         }
     }
@@ -154,7 +166,7 @@ impl<'input> Tokenizer<'input> {
                 _ => break,
             }
         }
-        return Ok(Token::Number(Number {
+        return Ok(Token::Number(tokens::Number {
             inner: Cow::Borrowed(self.input),
             span: Span::default(),
         }));
@@ -176,7 +188,7 @@ impl<'input> Tokenizer<'input> {
                 loop {
                     match self.chars.next() {
                         Some('"') => {
-                            return Some(Ok(Token::Str(token::Str {
+                            return Some(Ok(Token::Str(tokens::Str {
                                 inner: Cow::Borrowed(self.input),
                                 span: Span::default(),
                             })));
@@ -215,18 +227,5 @@ impl<'input> Iterator for Tokenizer<'input> {
             }
             Some(next)
         }
-    }
-}
-
-/// Tokenizes the input string and returns an iterator of tokens.
-pub fn tokenize(input: &str) -> Tokenizer<'_> {
-    Tokenizer {
-        // an EOF token is always returned at the very end, so even if the input string is empty,
-        // the iterator hasn't ended yet.
-        ended: false,
-        input,
-        chars: input.chars().peekable(),
-        begin: [0; 2],
-        fi: [0; 2],
     }
 }
