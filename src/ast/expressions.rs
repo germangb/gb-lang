@@ -1,7 +1,6 @@
 use crate::{
     ast::{Context, Error, Grammar},
-    lex,
-    lex::{tokens::Token, Tokenizer},
+    lex::{tokens, tokens::Token, Tokenizer},
 };
 use std::iter::Peekable;
 
@@ -35,23 +34,18 @@ impl<'input> Grammar<'input> for Expression<'input> {
                     .expect("Expected Ok token");
                 Err(Error::UnexpectedToken)
             }
-            Some(Err(_)) => Err(Error::Lex(
-                tokens
-                    .next()
-                    .expect("Expected some token")
-                    .expect_err("Expected token error."),
-            )),
-            None => {
-                let _ = tokens.next();
-                Err(Error::TokenizerEmpty)
+            Some(Err(_)) => {
+                tokens.next().expect("Expected some token")?;
+                unreachable!();
             }
+            None => Err(Error::TokenizerEmpty),
         }
     }
 }
 
-pub struct Number<'input>(lex::tokens::Number<'input>);
-pub struct Str<'input>(lex::tokens::Str<'input>);
-pub struct Identifier<'input>(lex::tokens::Identifier<'input>);
+pub struct Number<'input>(pub tokens::Number<'input>);
+pub struct Str<'input>(pub tokens::Str<'input>);
+pub struct Identifier<'input>(pub tokens::Identifier<'input>);
 
 impl<'input> ExpressionGrammar<'input> for Number<'input> {}
 impl<'input> ExpressionGrammar<'input> for Str<'input> {}

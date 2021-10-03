@@ -40,3 +40,10 @@ let baz::ptr(u8) = addr(bar[3]);
 
 // pointer operations
 deref(baz) = 2;
+
+if foo+1
+    bar();
+else {
+    baz();
+    bazz();
+}
