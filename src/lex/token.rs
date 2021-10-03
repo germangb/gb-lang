@@ -28,8 +28,8 @@ tokens! {
 
     /// `EOF`
     pub struct EOF;
-    pub struct Ident;
-    pub struct Num;
+    pub struct Identifier;
+    pub struct Number;
     /// `"Hello, world!"`
     pub struct Str;
 

@@ -112,7 +112,39 @@ fn tokenize_string_error() {
 }
 
 #[test]
-#[ignore]
 fn tokenize_num() {
-    todo!();
+    assert_token_matches!(
+        "0 123456789",
+        [Token::Number(_), Token::Number(_), Token::EOF(_),],
+    );
+}
+
+#[test]
+#[ignore]
+fn tokenize_num_multiple_raxix() {
+    assert_token_matches!(
+        "0 123456789 0x123456789abcdefABCDEF 01234567 0b1010",
+        [
+            Token::Number(_),
+            Token::Number(_),
+            Token::Number(_),
+            Token::Number(_),
+            Token::Number(_),
+            Token::EOF(_),
+        ],
+    );
+}
+
+#[test]
+#[ignore]
+fn tokenize_invalid_number_error() {
+    todo!()
+}
+
+#[test]
+fn tokenize_identifier() {
+    assert_token_matches!(
+        "hello world",
+        [Token::Identifier(_), Token::Identifier(_), Token::EOF(_),],
+    );
 }

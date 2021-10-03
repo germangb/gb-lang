@@ -5,7 +5,6 @@ pub use token::*;
 
 mod error;
 mod token;
-#[macro_use]
 mod utils;
 
 #[derive(Debug)]
@@ -68,7 +67,10 @@ macro_rules! handle_alpha {
                 inner: Cow::Borrowed($s.input),
                 span: Span::default(),
             })),)*
-            _ => todo!(),
+            _ => Ok(Token::Identifier(Identifier {
+                inner: Cow::Borrowed($s.input),
+                span: Span::default(),
+            })),
         }
     };
 }
@@ -143,10 +145,25 @@ impl<'input> Tokenizer<'input> {
         }
     }
 
+    fn next_token_num(&mut self) -> Result<Token<'input>, Error> {
+        loop {
+            // TODO(german) handle proper radix (decimal, octal, binary)
+            match self.chars.peek() {
+                #[rustfmt::skip]
+                Some('0'..='9') => { self.chars.next().unwrap(); }
+                _ => break,
+            }
+        }
+        return Ok(Token::Number(Number {
+            inner: Cow::Borrowed(self.input),
+            span: Span::default(),
+        }));
+    }
+
     fn next_token_alphanum(&mut self) -> Result<Token<'input>, Error> {
         let next = self.chars.peek().expect("Expected character");
         if next.is_numeric() {
-            todo!()
+            self.next_token_num()
         } else {
             self.next_token_alpha()
         }
@@ -162,7 +179,7 @@ impl<'input> Tokenizer<'input> {
                             return Some(Ok(Token::Str(token::Str {
                                 inner: Cow::Borrowed(self.input),
                                 span: Span::default(),
-                            })))
+                            })));
                         }
                         Some(_) => {}
                         None => return Some(Err(Error::OpenEndedStringToken)),

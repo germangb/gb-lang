@@ -6,11 +6,11 @@ use std::{
 /// Tokenization errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Error variant for internal-use only.
-    Internal,
-
     /// Triggered when the input source ends with an open-ended string token.
     OpenEndedStringToken,
+
+    /// Invalid number format.
+    InvalidNumberToken,
 }
 
 impl Display for Error {
