@@ -39,10 +39,7 @@ impl<'input> Grammar<'input> for Statement<'input> {
             Some(Ok(Token::Loop(_))) => Ok(Statement::Loop(Grammar::parse(tokens, context)?)),
             Some(Ok(Token::While(_))) => Ok(Statement::While(Grammar::parse(tokens, context)?)),
             Some(Ok(_)) => {
-                tokens
-                    .next()
-                    .expect("Expected some token")
-                    .expect("Expected Ok token");
+                tokens.next().unwrap().unwrap();
                 Err(Error::UnexpectedToken)
             }
             Some(Err(_)) => {

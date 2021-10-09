@@ -13,8 +13,8 @@ const@0xffff FONT::[u8 256];    // Optionally hardcode the memory location
 // This example defines the memory layout of the gameboy VRAM.
 static VRAM@0x8000::struct {
     tile_data::union {
-        table0::struct {             data::[u8 0x1000] },
-        table1::struct { [u8 0x800], data::[u8 0x1000] }, // non-named fields act as padding
+        table0::struct {             data0::[u8 0x1000] },
+        table1::struct { [u8 0x800], data1::[u8 0x1000] }, // non-named fields act as padding
     },
     tile_maps::struct { map0::[u8 0x400],
                         map1::[u8 0x400] },
@@ -35,7 +35,7 @@ while foo {
 
 // variables
 let foo::u8 = 26;
-let bar::[u8 5] = [1, VRAM::tile_data::table1::data[2], 3, foo + 4, 5];
+let bar::[u8 5] = [1, data1[2], 3, foo + 4, 5];
 let baz::ptr(u8) = addr(bar[3]);
 
 // pointer operations

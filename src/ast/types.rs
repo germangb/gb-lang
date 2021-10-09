@@ -26,10 +26,7 @@ impl<'input> Grammar<'input> for Type<'input> {
             Some(Ok(Token::SquareLeft(_))) => Ok(Type::Array(Grammar::parse(tokens, context)?)),
             Some(Ok(Token::Ptr(_))) => Ok(Type::Ptr(Grammar::parse(tokens, context)?)),
             Some(Ok(_)) => {
-                tokens
-                    .next()
-                    .expect("Expected some token")
-                    .expect("Expected Ok token");
+                tokens.next().unwrap().unwrap();
                 Err(Error::UnexpectedToken)
             }
             Some(Err(_)) => {

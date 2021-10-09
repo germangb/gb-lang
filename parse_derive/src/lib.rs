@@ -1,7 +1,5 @@
 extern crate proc_macro;
 
-use syn::__private::TokenStream2;
-
 #[proc_macro_derive(StatementGrammar)]
 pub fn statement_grammar_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let subtrait_path = quote::quote!(crate::ast::statements::StatementGrammar);
@@ -37,7 +35,7 @@ fn derive_struct(subtrait_path: &proc_macro2::TokenStream,
     match &data.fields {
         syn::Fields::Named(named) => derive_struct_named(subtrait_path, derive_input, named),
         syn::Fields::Unnamed(unnamed) => derive_struct_unnamed(subtrait_path, derive_input, unnamed),
-        Unit => todo!(),
+        syn::Fields::Unit => derive_struct_unit(subtrait_path, derive_input),
     }
 }
 
@@ -63,8 +61,8 @@ fn derive_struct_named(subtrait_path: &proc_macro2::TokenStream,
 
 #[rustfmt::skip]
 fn derive_struct_unnamed(subtrait_path: &proc_macro2::TokenStream,
-                       derive_input: &syn::DeriveInput,
-                       fields_unnamed: &syn::FieldsUnnamed) -> proc_macro2::TokenStream {
+                         derive_input: &syn::DeriveInput,
+                         fields_unnamed: &syn::FieldsUnnamed) -> proc_macro2::TokenStream {
     let (impl_, ty, where_) = derive_input.generics.split_for_impl();
     let ident = &derive_input.ident;
     let fields = fields_unnamed.unnamed.iter()
@@ -75,6 +73,22 @@ fn derive_struct_unnamed(subtrait_path: &proc_macro2::TokenStream,
             fn parse(tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
                      context: &mut crate::ast::Context) -> Result<Self, crate::ast::Error> {
                 Ok(Self(#(#fields)*))
+            }
+        }
+    }
+}
+
+#[rustfmt::skip]
+fn derive_struct_unit(subtrait_path: &proc_macro2::TokenStream,
+                      derive_input: &syn::DeriveInput) -> proc_macro2::TokenStream {
+    let (impl_, ty, where_) = derive_input.generics.split_for_impl();
+    let ident = &derive_input.ident;
+    quote::quote! {
+        impl #impl_ #subtrait_path <'input> for #ident #ty #where_ {}
+        impl #impl_ crate::ast::Grammar <'input> for #ident #ty #where_ {
+            fn parse(tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
+                     context: &mut crate::ast::Context) -> Result<Self, crate::ast::Error> {
+                Ok(Self)
             }
         }
     }
