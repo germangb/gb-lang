@@ -50,6 +50,7 @@ impl<'input> Grammar<'input> for Statement<'input> {
     }
 }
 
+#[derive(parse_derive::StatementGrammar)]
 pub struct Let<'input, T, E>
 where
     T: TypeGrammar<'input>,
@@ -64,34 +65,7 @@ where
     pub semi_colon: tokens::SemiColon<'input>,
 }
 
-impl<'input, T, E> StatementGrammar<'input> for Let<'input, T, E>
-where
-    T: TypeGrammar<'input>,
-    E: ExpressionGrammar<'input>,
-{
-}
-
-impl<'input, T, E> Grammar<'input> for Let<'input, T, E>
-where
-    T: TypeGrammar<'input>,
-    E: ExpressionGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            let_: Grammar::parse(tokens, context)?,
-            identifier: Grammar::parse(tokens, context)?,
-            colon_colon: Grammar::parse(tokens, context)?,
-            type_: Grammar::parse(tokens, context)?,
-            equals: Grammar::parse(tokens, context)?,
-            expression: Grammar::parse(tokens, context)?,
-            semi_colon: Grammar::parse(tokens, context)?,
-        })
-    }
-}
-
+#[derive(parse_derive::StatementGrammar)]
 pub struct Const<'input, T>
 where
     T: TypeGrammar<'input>,
@@ -103,26 +77,7 @@ where
     pub semi_colon: tokens::SemiColon<'input>,
 }
 
-impl<'input, T> StatementGrammar<'input> for Const<'input, T> where T: TypeGrammar<'input> {}
-
-impl<'input, T> Grammar<'input> for Const<'input, T>
-where
-    T: TypeGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            const_: Grammar::parse(tokens, context)?,
-            identifier: Grammar::parse(tokens, context)?,
-            colon_colon: Grammar::parse(tokens, context)?,
-            type_: Grammar::parse(tokens, context)?,
-            semi_colon: Grammar::parse(tokens, context)?,
-        })
-    }
-}
-
+#[derive(parse_derive::StatementGrammar)]
 pub struct Static<'input, T, E>
 where
     T: TypeGrammar<'input>,
@@ -137,34 +92,7 @@ where
     pub semi_colon: tokens::SemiColon<'input>,
 }
 
-impl<'input, T, E> StatementGrammar<'input> for Static<'input, T, E>
-where
-    T: TypeGrammar<'input>,
-    E: ExpressionGrammar<'input>,
-{
-}
-
-impl<'input, T, E> Grammar<'input> for Static<'input, T, E>
-where
-    T: TypeGrammar<'input>,
-    E: ExpressionGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            static_: Grammar::parse(tokens, context)?,
-            identifier: Grammar::parse(tokens, context)?,
-            colon_colon: Grammar::parse(tokens, context)?,
-            type_: Grammar::parse(tokens, context)?,
-            equals: Grammar::parse(tokens, context)?,
-            expression: Grammar::parse(tokens, context)?,
-            semi_colon: Grammar::parse(tokens, context)?,
-        })
-    }
-}
-
+#[derive(parse_derive::StatementGrammar)]
 pub struct Scope<'input, I>
 where
     I: StatementGrammar<'input>,
@@ -174,24 +102,7 @@ where
     pub curly_right: tokens::CurlyRight<'input>,
 }
 
-impl<'input, I> StatementGrammar<'input> for Scope<'input, I> where I: StatementGrammar<'input> {}
-
-impl<'input, I> Grammar<'input> for Scope<'input, I>
-where
-    I: StatementGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            curly_left: Grammar::parse(tokens, context)?,
-            inner: Grammar::parse(tokens, context)?,
-            curly_right: Grammar::parse(tokens, context)?,
-        })
-    }
-}
-
+#[derive(parse_derive::StatementGrammar)]
 pub struct If<'input, E, I>
 where
     E: ExpressionGrammar<'input>,
@@ -200,28 +111,4 @@ where
     pub if_: tokens::If<'input>,
     pub expression: E,
     pub inner: I,
-}
-
-impl<'input, E, I> StatementGrammar<'input> for If<'input, E, I>
-where
-    E: ExpressionGrammar<'input>,
-    I: StatementGrammar<'input>,
-{
-}
-
-impl<'input, E, I> Grammar<'input> for If<'input, E, I>
-where
-    E: ExpressionGrammar<'input>,
-    I: StatementGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            if_: Grammar::parse(tokens, context)?,
-            expression: Grammar::parse(tokens, context)?,
-            inner: Grammar::parse(tokens, context)?,
-        })
-    }
 }

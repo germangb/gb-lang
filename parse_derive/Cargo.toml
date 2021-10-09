@@ -1,11 +1,14 @@
 [package]
-name = "gb-lang"
+name = "parse_derive"
 version = "0.1.0"
-authors = ["german gomez <germangb42@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+proc-macro = true
+
 [dependencies]
-thiserror = "1.0.29"
-parse_derive = { path = "./parse_derive" }
+syn = "1.0.80"
+proc-macro2 = "1.0.29"
+quote = "1.0.10"

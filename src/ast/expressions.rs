@@ -43,37 +43,11 @@ impl<'input> Grammar<'input> for Expression<'input> {
     }
 }
 
+#[derive(parse_derive::ExpressionGrammar)]
 pub struct Number<'input>(pub tokens::Number<'input>);
+
+#[derive(parse_derive::ExpressionGrammar)]
 pub struct Str<'input>(pub tokens::Str<'input>);
+
+#[derive(parse_derive::ExpressionGrammar)]
 pub struct Identifier<'input>(pub tokens::Identifier<'input>);
-
-impl<'input> ExpressionGrammar<'input> for Number<'input> {}
-impl<'input> ExpressionGrammar<'input> for Str<'input> {}
-impl<'input> ExpressionGrammar<'input> for Identifier<'input> {}
-
-impl<'input> Grammar<'input> for Number<'input> {
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self(Grammar::parse(tokens, context)?))
-    }
-}
-
-impl<'input> Grammar<'input> for Str<'input> {
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self(Grammar::parse(tokens, context)?))
-    }
-}
-
-impl<'input> Grammar<'input> for Identifier<'input> {
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self(Grammar::parse(tokens, context)?))
-    }
-}

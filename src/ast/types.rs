@@ -41,67 +41,27 @@ impl<'input> Grammar<'input> for Type<'input> {
     }
 }
 
+#[derive(parse_derive::TypeGrammar)]
 pub struct U8<'input>(pub tokens::U8<'input>);
 
-impl<'input> TypeGrammar<'input> for U8<'input> {}
-
-impl<'input> Grammar<'input> for U8<'input> {
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self(Grammar::parse(tokens, context)?))
-    }
-}
-
-pub struct Array<'input, T: TypeGrammar<'input>> {
+#[derive(parse_derive::TypeGrammar)]
+pub struct Array<'input, T>
+where
+    T: TypeGrammar<'input>,
+{
     pub square_left: tokens::SquareLeft<'input>,
     pub type_: T,
     pub number: tokens::Number<'input>,
     pub square_right: tokens::SquareRight<'input>,
 }
 
-impl<'input, T> TypeGrammar<'input> for Array<'input, T> where T: TypeGrammar<'input> {}
-
-impl<'input, T> Grammar<'input> for Array<'input, T>
+#[derive(parse_derive::TypeGrammar)]
+pub struct Ptr<'input, T>
 where
     T: TypeGrammar<'input>,
 {
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            square_left: Grammar::parse(tokens, context)?,
-            type_: Grammar::parse(tokens, context)?,
-            number: Grammar::parse(tokens, context)?,
-            square_right: Grammar::parse(tokens, context)?,
-        })
-    }
-}
-
-pub struct Ptr<'input, T: TypeGrammar<'input>> {
     pub ptr: tokens::Ptr<'input>,
     pub less_than: tokens::LessThan<'input>,
     pub type_: T,
     pub greater_than: tokens::GreaterThan<'input>,
-}
-
-impl<'input, T: TypeGrammar<'input>> TypeGrammar<'input> for Ptr<'input, T> {}
-
-impl<'input, T> Grammar<'input> for Ptr<'input, T>
-where
-    T: TypeGrammar<'input>,
-{
-    fn parse(
-        tokens: &mut Peekable<Tokenizer<'input>>,
-        context: &mut Context,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            ptr: Grammar::parse(tokens, context)?,
-            less_than: Grammar::parse(tokens, context)?,
-            type_: Grammar::parse(tokens, context)?,
-            greater_than: Grammar::parse(tokens, context)?,
-        })
-    }
 }
