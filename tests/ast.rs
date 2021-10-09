@@ -1,6 +1,6 @@
 use gb_lang::ast::{
     expressions::{Expression, Number, Str},
-    statements::{Const, If, Let, Scope, Statement, Static},
+    statements::{Const, If, Let, Loop, Scope, Statement, Static, While},
     types::{Array, Type, U8},
 };
 
@@ -27,4 +27,16 @@ fn static_statement() {
 fn if_statement() {
     gb_lang::parse::<If<Number, Statement>>("if 0\nlet foo::u8 = 4;").unwrap();
     gb_lang::parse::<If<Number, Scope<Statement>>>("if 0{let foo::u8=4;}").unwrap();
+}
+
+#[test]
+fn loop_statement() {
+    gb_lang::parse::<Loop<Statement>>("loop let foo::u8 = 4;").unwrap();
+    gb_lang::parse::<Loop<Scope<Statement>>>("loop {let foo::u8 = 4;}").unwrap();
+}
+
+#[test]
+fn while_statement() {
+    gb_lang::parse::<While<Number, Statement>>("while 1 let foo::u8 = 4;").unwrap();
+    gb_lang::parse::<While<Number, Scope<Statement>>>("while 0 {let foo::u8 = 4;}").unwrap();
 }

@@ -19,6 +19,8 @@ pub enum Statement<'input> {
     Static(Static<'input, Type<'input>, Expression<'input>>),
     Scope(Scope<'input, Box<Statement<'input>>>),
     If(If<'input, Expression<'input>, Box<Statement<'input>>>),
+    Loop(Loop<'input, Box<Statement<'input>>>),
+    While(While<'input, Expression<'input>, Box<Statement<'input>>>),
 }
 
 impl<'input> StatementGrammar<'input> for Statement<'input> {}
@@ -34,6 +36,8 @@ impl<'input> Grammar<'input> for Statement<'input> {
             Some(Ok(Token::Static(_))) => Ok(Statement::Static(Grammar::parse(tokens, context)?)),
             Some(Ok(Token::CurlyLeft(_))) => Ok(Statement::Scope(Grammar::parse(tokens, context)?)),
             Some(Ok(Token::If(_))) => Ok(Statement::If(Grammar::parse(tokens, context)?)),
+            Some(Ok(Token::Loop(_))) => Ok(Statement::Loop(Grammar::parse(tokens, context)?)),
+            Some(Ok(Token::While(_))) => Ok(Statement::While(Grammar::parse(tokens, context)?)),
             Some(Ok(_)) => {
                 tokens
                     .next()
@@ -109,6 +113,26 @@ where
     I: StatementGrammar<'input>,
 {
     pub if_: tokens::If<'input>,
+    pub expression: E,
+    pub inner: I,
+}
+
+#[derive(parse_derive::StatementGrammar)]
+pub struct Loop<'input, I>
+where
+    I: StatementGrammar<'input>,
+{
+    pub loop_: tokens::Loop<'input>,
+    pub inner: I,
+}
+
+#[derive(parse_derive::StatementGrammar)]
+pub struct While<'input, E, I>
+where
+    E: ExpressionGrammar<'input>,
+    I: StatementGrammar<'input>,
+{
+    pub while_: tokens::While<'input>,
     pub expression: E,
     pub inner: I,
 }
