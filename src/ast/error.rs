@@ -4,18 +4,18 @@ use std::{
 };
 
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum Error<'input> {
     /// Tokenization error.
     Lex(#[from] crate::lex::Error),
 
     /// Unexpected token error.
-    UnexpectedToken,
+    UnexpectedToken(crate::lex::Token<'input>),
 
     /// Tokenizer ran out of tokens.
     TokenizerEmpty,
 }
 
-impl Display for Error {
+impl Display for Error<'_> {
     fn fmt(&self, _: &mut Formatter<'_>) -> fmt::Result {
         todo!()
     }

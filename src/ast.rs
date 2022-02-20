@@ -7,7 +7,7 @@ pub mod expressions;
 pub mod statements;
 pub mod types;
 
-pub fn parse<'input, G>(input: &'input str) -> Result<G, Error>
+pub fn parse<'input, G>(input: &'input str) -> Result<G, Error<'input>>
 where
     G: Grammar<'input>,
 {
@@ -20,20 +20,22 @@ pub trait Grammar<'input>: Sized {
     fn parse(
         tokens: &mut Peekable<Tokenizer<'input>>,
         context: &mut Context,
-    ) -> Result<Self, Error>;
+    ) -> Result<Self, Error<'input>>;
 }
+
+pub trait TokenGrammar<'input>: Grammar<'input> {}
 
 impl<'input, G: Grammar<'input>> Grammar<'input> for Box<G> {
     fn parse(
         tokens: &mut Peekable<Tokenizer<'input>>,
         context: &mut Context,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<'input>> {
         Ok(Box::new(Grammar::parse(tokens, context)?))
     }
 }
 
 impl<'input> Grammar<'input> for () {
-    fn parse(_: &mut Peekable<Tokenizer<'input>>, _: &mut Context) -> Result<Self, Error> {
+    fn parse(_: &mut Peekable<Tokenizer<'input>>, _: &mut Context) -> Result<Self, Error<'input>> {
         Ok(())
     }
 }

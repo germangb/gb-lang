@@ -15,11 +15,11 @@ macro_rules! tokens {
                 fn parse(
                     tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
                     _: &mut crate::ast::Context,
-                ) -> Result<Self, crate::ast::Error> {
+                ) -> Result<Self, crate::ast::Error<'input>> {
                     match tokens.next() {
                         Some(Err(e)) => Err(e)?,
                         Some(Ok(Token::$token_name(t))) => Ok(t),
-                        Some(Ok(_)) => Err(crate::ast::Error::UnexpectedToken),
+                        Some(Ok(token)) => Err(crate::ast::Error::UnexpectedToken(token)),
                         None => Err(crate::ast::Error::TokenizerEmpty),
                     }
                 }
@@ -29,7 +29,7 @@ macro_rules! tokens {
                 fn parse(
                     tokens: &mut std::iter::Peekable<crate::lex::Tokenizer<'input>>,
                     _: &mut crate::ast::Context,
-                ) -> Result<Self, crate::ast::Error> {
+                ) -> Result<Self, crate::ast::Error<'input>> {
                     match tokens.next() {
                         Some(Ok(Token::$token_name(t))) => Ok(Some(t)),
                         // TODO(german): consider if returning buffered Err from tokenizer makes sense.
@@ -64,6 +64,10 @@ tokens! {
 
     /// `addr`
     pub struct Addr;
+    /// `array`
+    pub struct Array;
+    /// `asm`
+    pub struct Asm;
     /// `break`
     pub struct Break;
     /// `const`
@@ -128,6 +132,8 @@ tokens! {
     pub struct At;
     /// `:`
     pub struct Colon;
+    /// `,`
+    pub  struct Comma;
     /// `{`
     pub struct CurlyLeft;
     /// `}`

@@ -46,11 +46,12 @@ fn tokenize_two_chars() {
 #[test]
 fn tokenize_one_char() {
     assert_token_matches!(
-        "&@:{}=/><-~|()+;[]*^",
+        "&@:,{}=/><-~|()+;[]*^",
         [
             Token::And(_),
             Token::At(_),
             Token::Colon(_),
+            Token::Comma(_),
             Token::CurlyLeft(_),
             Token::CurlyRight(_),
             Token::Equals(_),
@@ -76,9 +77,11 @@ fn tokenize_one_char() {
 #[test]
 fn tokenize_keywords() {
     assert_token_matches!(
-        "addr break const continue deref else if let loop ptr static struct union u8 while",
+        "addr array asm break const continue deref else if let loop ptr static struct union u8 while",
         [
             Token::Addr(_),
+            Token::Array(_),
+            Token::Asm(_),
             Token::Break(_),
             Token::Const(_),
             Token::Continue(_),

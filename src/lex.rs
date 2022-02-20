@@ -1,6 +1,7 @@
-use crate::{lex::tokens::Token, Span};
+use crate::Span;
 pub use error::Error;
 use std::{borrow::Cow, iter::Peekable, str::Chars};
+pub use tokens::Token;
 
 mod error;
 pub mod tokens;
@@ -116,6 +117,7 @@ impl<'input> Tokenizer<'input> {
             '&' => { And, '=' => AndEquals },
             '@' => { At },
             ':' => { Colon, ':' => ColonColon },
+            ',' => { Comma },
             '{' => { CurlyLeft },
             '}' => { CurlyRight },
             '=' => { Equals, '=' => EqualsEquals },
@@ -140,6 +142,8 @@ impl<'input> Tokenizer<'input> {
         handle_alpha! {
             self,
             "addr" => { Addr },
+            "array" => { Array },
+            "asm" => { Asm },
             "break" => { Break },
             "const" => { Const },
             "continue" => { Continue },
